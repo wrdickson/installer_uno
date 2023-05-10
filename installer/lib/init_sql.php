@@ -45,17 +45,17 @@ $drop_options_sql = "DROP TABLE IF EXISTS `options`";
 
 $create_options_sql = "CREATE TABLE `options` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `option_name` varchar(144) COLLATE utf8mb4_general_ci NOT NULL,
-  `option_value` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `option_name` varchar(144) NOT NULL,
+  `option_value` longtext  NOT NULL,
   `autoload` tinyint(4) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
 $drop_payment_types_sql = "DROP TABLE IF EXISTS `payment_types`";
 
 $create_payment_types_sql = "CREATE TABLE `payment_types` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `payment_title` varchar(45) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `payment_title` varchar(45) NOT NULL,
   `is_active` tinyint(4) NOT NULL,
   `display_order` int(11) NOT NULL,
   PRIMARY KEY (`id`)
@@ -115,6 +115,7 @@ $drop_sale_items_sql = "DROP TABLE IF EXISTS `sale_items`";
 $create_sale_items_sql = "CREATE TABLE `sale_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `folio` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL,
   `sale_type` int(11) NOT NULL,
   `posted_by` int(11) NOT NULL,
   `description` tinytext NOT NULL,

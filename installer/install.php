@@ -8,12 +8,18 @@
   <body>
     
     <div class="container">
-      <h1>install.php</h1>
+      <h1>Installer</h1>
       <div class="row">
         
           <?php
-          require('init_sql.php');
-          echo print_r($_POST);
+          require('../vendor/autoload.php');
+          use \Brick\Money\Money;
+          //  TODO use brick/money (also get it in there with composer
+          require('lib/init_sql.php');
+          require('lib/Validate.php');
+          
+          echo "<p>Post variables: </p>";
+          echo "<PRE>" . var_dump($_POST) . "</PRE>";
 
           //  TODO validate inputs!
 
@@ -32,6 +38,28 @@
           $site_name = $_POST['site_name'];
           $default_locale = $_POST['default_locale'];
           $house_account_name = $_POST['house_account_name'];
+          if(isset($_POST['currency_code'])){
+            $cur_code = $_POST['currency_code'];
+          } else {
+            $cur_code = 'USD';
+          }
+          $time_zone = $_POST['tz'];
+
+          $u1 = Money::of(1, $cur_code);
+          $currency_code = $u1->getCurrency()->getCurrencyCode();
+          $currency_fraction_digits = $u1->getCurrency()->getDefaultFractionDigits();
+          $currency_numeric_code = $u1->getCurrency()->getNumericCode();
+          $currency_name = $u1->getCurrency()->getName();
+          echo "<hr>";
+          echo "<p>Currency code: " . $currency_code . "</p>";
+          echo "<p>Fraction digits: " . $currency_fraction_digits . "</p>";
+          echo "<p>Numeric code: " . $currency_numeric_code . "</p>";
+          echo "<p>Currency name: " . $currency_name . "</p>";
+          echo "<hr>";
+
+          echo "<p>Timezone:" . $time_zone . "</p>";
+          echo "<hr>";
+
 
           try {
             $pdo = new PDO('mysql:host=' . $db_host .';dbname=' . $db_name, $db_user, $db_pass);
@@ -59,11 +87,29 @@
             fwrite( $f, $s);
             $s = "define('JWT_KEY', '{$jwt_key}');\n";
             fwrite( $f, $s );
+            $s = "define('DEFAULT_LOCALE', '{$default_locale}');\n";
+            fwrite( $f, $s );
+            $s = "define('DEFAULT_TIMEZONE', '{$time_zone}');\n";
+            fwrite( $f, $s );
+            $s = "define('CURRENCY_CODE', '{$currency_code}');\n";
+            fwrite( $f, $s );
+            $s = "define('CURRENCY_FRACTION_DIGITS', '{$currency_fraction_digits}');\n";
+            fwrite( $f, $s );
+            $s = "define('CURRENCY_NUMERIC_CODE', '{$currency_numeric_code}');\n";
+            fwrite( $f, $s );
+            $s = "define('CURRENCY_NAME', '{$currency_name}');\n";
+            fwrite( $f, $s );
+            $s = "date_default_timezone_set(DEFAULT_TIMEZONE);\n";
+            fwrite( $f, $s );
+
+
+            //  run the query to dropthe accounts table
+            $stmt = $pdo->prepare( $drop_accounts_sql );
+            if( $execute = $stmt->execute() ) {
+              echo "<p>Accounts table dropped . . .</p>";
+            }
 
             //  run the query to build the accounts table
-            $stmt = $pdo->prepare( $drop_accounts_sql );
-            $stmt->execute();
-
             $stmt = $pdo->prepare( $create_accounts_sql );
             if( $execute = $stmt->execute() ) {
               echo "<p>Accounts table created . . .</p>";
@@ -95,6 +141,8 @@
               echo "<p>Options table created . . .</p>";
             }
 
+            //  TODO insert currency data into options
+
             // insert site_name into options . . .
             $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
             // without this, i get a 'cannot pass value by reference' error
@@ -105,12 +153,64 @@
               echo "<p>Insert site_name into options . . .</p>";
             }
 
+            // insert currency_code into options . . .
+            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
+            // without this, i get a 'cannot pass value by reference' error
+            $nnn = 'currency_code';
+            $stmt->bindParam(':name', $nnn);
+            $stmt->bindParam(':value', $currency_code);
+            if( $stmt->execute() ) {
+              echo "<p>Insert currency_code into options . . .</p>";
+            }
+
+            // insert currency_fraction_digits into options . . .
+            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
+            // without this, i get a 'cannot pass value by reference' error
+            $nnn = 'currency_fraction_digits';
+            $stmt->bindParam(':name', $nnn);
+            $stmt->bindParam(':value', $currency_fraction_digits);
+            if( $stmt->execute() ) {
+              echo "<p>Insert currency_fraction_digits into options . . .</p>";
+            }
+
+            // insert currency_numeric_code into options . . .
+            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
+            // without this, i get a 'cannot pass value by reference' error
+            $nnn = 'currency_numeric_code';
+            $stmt->bindParam(':name', $nnn);
+            $stmt->bindParam(':value', $currency_numeric_code);
+            if( $stmt->execute() ) {
+              echo "<p>Insert currency_code into options . . .</p>";
+            }
+
+            // insert currency_name into options . . .
+            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
+            // without this, i get a 'cannot pass value by reference' error
+            $nnn = 'currency_name';
+            $stmt->bindParam(':name', $nnn);
+            $stmt->bindParam(':value', $currency_name);
+            if( $stmt->execute() ) {
+              echo "<p>Insert currency_name into options . . .</p>";
+            }
+
             //  insert default locale
-            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( 'default_locale', :ov, 1 )");
-            $stmt->bindParam(':ov', $default_locale);
+            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
+            $nnn = 'default_locale';
+            $stmt->bindParam(':name', $nnn);
+            $stmt->bindParam(':value', $default_locale);
             if( $stmt->execute() ) {
               echo"<p>Default locale inserted . . .</p>";
             }
+
+            //  insert default timezone
+            $stmt = $pdo->prepare("INSERT INTO options ( option_name, option_value, autoload ) VALUES ( :name, :value, 1 )");
+            $nnn = 'default_timezone';
+            $stmt->bindParam(':name', $nnn);
+            $stmt->bindParam(':value', $time_zone);
+            if( $stmt->execute() ) {
+              echo"<p>Default locale inserted . . .</p>";
+            }
+
 
             //  customers
             $stmt = $pdo->prepare($drop_customers_sql);

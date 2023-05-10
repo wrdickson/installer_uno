@@ -1,0 +1,12 @@
+{
+    "name": "trekb/installer_uno",
+    "authors": [
+        {
+            "name": "Bill Dickson",
+            "email": "trekbill@gmail.com"
+        }
+    ],
+    "require": {
+        "brick/money": "^0.8.0"
+    }
+}
