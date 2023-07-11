@@ -12,9 +12,9 @@
       <div class="row">
         
           <?php
-          require('../vendor/autoload.php');
+          require('../api/vendor/autoload.php');
           use \Brick\Money\Money;
-          //  TODO use brick/money (also get it in there with composer
+          //TODO use brick/money (also get it in there with composer
           require('lib/init_sql.php');
           require('lib/Validate.php');
           
