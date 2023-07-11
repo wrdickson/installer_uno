@@ -36,6 +36,7 @@
             <input class="form-control form-control-sm" type="text" id="admin_user_password_2" name="admin_user_password_2">
         </div>
         <div class="col col-6">
+          
             <label class="form-label" for="jwt_key">Token salt:</label>
             <input class="form-control form-control-sm" type="text" id="jwt_key" name="jwt_key">
             <label class="form-label" for="house_account_name">House Account Name:</label>
